@@ -1,0 +1,114 @@
+Read: 
+  protocolBuffers: https://tutorialedge.net/golang/go-protocol-buffer-tutorial/
+
+Tutorial:
+  gRPC: https://tutorialedge.net/golang/go-grpc-beginners-tutorial/
+
+pacakge:
+  - go get -u github.com/golang/protobuf/protoc-gen-go
+
+Intro:
+  def: gRPC is a modern open source remot procedure call (RPC) framework that can run anywhere
+  use: 
+    point1: distributed systems to communicate between apps
+    point2: allows us to expose methods within our app that we want other apps to use
+    point3: similar to REST  
+
+  gRPCvREST:
+    use: reset and gRPC are somewhat similar, there are some fundamental diff in how they work
+    one: gRPC uses http/2 where REST uses http 1.1
+    two: gRPC utilizes the protocol bufer data format as opposed to JSON (API)
+    three: gRPC can utilize http2 capabilities
+      - server-side streaming
+      - client-side streaming
+      - bidirectional-streaming 
+
+  gRPC_challenges:
+    - difficult to prototype. Can't use postman http client to interact with exposed gRPC service
+    - can use with postman but not natively
+
+  gRPC_in_golang:
+    - simple gRPC server in go (main.go) 
+    - once set up we can set a client to interact with it
+    - start off writing the function to listen on port for incoming TCP connections
+    - |-
+      package main
+
+      import (
+        "log"
+        "net"
+      )
+      
+      func main() {
+        lis, err := net.Listen("tcp", ":9000")
+        if err != nil {
+          log.Fatalf("failed to listen: %v", err)
+        }
+      }
+
+    - next import the official gRPC pacakge from golang.org so we can create teh new gRPC server
+    - then register endpoints we want to expose before serving this over existing TCP
+    - |-
+      package main
+
+      import (
+      	"log"
+      	"net"
+      
+      	"google.golang.org/grpc"
+      )
+      
+      func main() {
+      
+      	lis, err := net.Listen("tcp", ":9000")
+      	if err != nil {
+      		log.Fatalf("failed to listen: %v", err)
+      	}
+      
+      	grpcServer := grpc.NewServer()
+      
+      	if err := grpcServer.Serve(lis); err != nil {
+      		log.Fatalf("failed to serve: %s", err)
+      	}
+      }
+
+    - the above is the minimum for gRPC server in go (now it doesn't do much)
+
+  add_functionality:
+    - expose some functionality via gRPC server so that gRPC clients can interact with it
+    - define chat.proto file to act as our contract
+    - |-
+      syntax = "proto3";
+      package chat;
+
+      option go_package = "./";
+      
+      message Message {
+        string body = 1;
+      }
+      
+      service ChatService {
+        rpc SayHello(Message) returns (Message) {}
+      }
+
+    - .proto exposes our ChatService which has one SayHello function for our gRPC client to call
+    - .proto definitions are typically shared across clients of all shapes and sizes so they can generate their own cdoe to talk to our gRPC server
+    - generate go specific gRPC code using 'protoc'
+    - 'protoc --go_out=plugins=grpc:chat chat.proto'
+    - generates 'chat/chat.pb.go' containing generated code 
+    - update server.go to register our ChatService like so:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
